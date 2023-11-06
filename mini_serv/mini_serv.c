@@ -36,8 +36,7 @@ int main(int argc, char **argv) {
 	servaddr.sin_port = htons(atoi(argv[1]));
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) exitError("Fatal error\n");
 	if (listen(sockfd, 128) != 0) exitError("Fatal error\n");  // it is 10 in the main replace it with 128
-    while(1)
-    {
+    while(1) {
         readyRead = readyWrite = active;
         if (select(max + 1, &readyRead, &readyWrite, NULL, NULL) < 0) continue;
         for(int fd = 0; fd <= max; fd++) {
@@ -56,6 +55,7 @@ int main(int argc, char **argv) {
                 if (read <= 0) {
                     sprintf(bufWrite, "server: client %d just left\n", clients[fd].id);
                     sendAll(fd);
+                    bzero(&clients[fd].msg, strlen(clients[fd].msg));
                     FD_CLR(fd, &active);
                     close(fd);
                     break;
