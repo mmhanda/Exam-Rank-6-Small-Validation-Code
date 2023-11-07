@@ -23,11 +23,11 @@ void sendAll(int sender_fd) {
 
 int main(int ac, char **av) {
     if (ac != 2) exitError("Wrong number of arguments\n");
-  	int sockfd = max = socket(AF_INET, SOCK_STREAM, 0); // from main Unitl line
+  	int sockfd = max = socket(AF_INET, SOCK_STREAM, 0); // copy from main.c Unitl line 27
 	if (sockfd == -1) exitError("Fatal error\n");
     FD_ZERO(&active_fds);
     FD_SET(sockfd, &active_fds);
-	struct sockaddr_in servaddr; // from main Unitl line
+	struct sockaddr_in servaddr; // copy from main.c Unitl line 35
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
 	servaddr.sin_port = htons(atoi(av[1]));
@@ -51,7 +51,7 @@ int main(int ac, char **av) {
                 if (read <= 0) {
                     sprintf(buffWrite, "server: client %d just left\n", clients[fd].id);
                     sendAll(fd);
-                    bzero(&clients[fd].msg, strlen(clients[fd].msg));
+                    bzero(clients[fd].msg, strlen(clients[fd].msg));
                     FD_CLR(fd, &active_fds);
                     close(fd);
                     break;
@@ -63,7 +63,7 @@ int main(int ac, char **av) {
                             clients[fd].msg[j] = '\0';
                             sprintf(buffWrite, "client %d: %s\n", clients[fd].id, clients[fd].msg);
                             sendAll(fd);
-                            bzero(&clients[fd].msg, strlen(clients[fd].msg));
+                            bzero(clients[fd].msg, strlen(clients[fd].msg));
                             j = -1;
                         }
                     }
