@@ -6,10 +6,9 @@ typedef struct client {
 } t_client;
 
 t_client clients[1024];
-
-int max = 0, next_id = 0;
-fd_set active_fds, fds_Read, fds_Write;
 char buffRead[100000], buffWrite[100000];
+int max = 0, next_id = 0;
+fd_set active_fds, Read_fds, Write_fds;
 
 void exitError(char *str) {
     write(2, str, strlen(str));
@@ -17,8 +16,8 @@ void exitError(char *str) {
 }
 
 void sendMsg(int sender_fd) {
-    for(int fd = 0; fd <= max; fd++)
-        if (FD_ISSET(fd, &fds_Write) && fd != sender_fd) write(fd, buffWrite, strlen(buffWrite));
+    for (int fd = 0; fd <= max; fd++)
+        if (FD_ISSET(fd, &Write_fds) && fd != sender_fd) write(fd, buffWrite, strlen(buffWrite));
 }
 
 int main(int ac, char **av) {
@@ -32,31 +31,31 @@ int main(int ac, char **av) {
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1 // copy
 	servaddr.sin_port = htons(atoi(av[1]));                  // copy
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) exitError("Fatal error\n"); // copy
-	if (listen(sockfd, 128) != 0) exitError("Fatal error\n");  // replace 10 with 128 // copy
+	if (listen(sockfd, 10) != 0) exitError("Fatal error\n"); // copy
     while(1) {
-        fds_Read = fds_Write = active_fds;
-        if (select(max + 1, &fds_Read, &fds_Write, NULL, NULL) < 0) continue;
-        for(int fd = 0; fd <= max; fd++) {
-            if (FD_ISSET(fd, &fds_Read) && fd == sockfd) { // hnaya sorry in english join new client
-                int newfd = accept(sockfd, NULL, NULL);
-                max = (newfd > max) ? newfd : max;
-                clients[newfd].id = next_id++;
-                FD_SET(newfd, &active_fds);
-                sprintf(buffWrite, "server: client %d just arrived\n", clients[newfd].id);
-                sendMsg(newfd);
+        Read_fds = Write_fds = active_fds;
+        if (select(max + 1, &Read_fds, &Write_fds, NULL, NULL) < 0) continue;
+        for (int fd = 0; fd <= max; fd++) {
+            if (FD_ISSET(fd, &Read_fds) && fd == sockfd) { // hnaya sorry in english here join new client
+                int ClientSocket = accept(sockfd, NULL, NULL);
+                max = (ClientSocket > max) ? ClientSocket : max;
+                clients[ClientSocket].id = next_id++;
+                bzero(clients[ClientSocket].msg, strlen(clients[ClientSocket].msg)); // protection
+                FD_SET(ClientSocket, &active_fds);
+                sprintf(buffWrite, "server: client %d just arrived\n", clients[ClientSocket].id);
+                sendMsg(ClientSocket);
                 break;
             }
-            if (FD_ISSET(fd, &fds_Read) && fd != sockfd) { // recive msgs from clients if its empty than the client is quit
+            if (FD_ISSET(fd, &Read_fds) && fd != sockfd) { // recive msgs from clients if its empty than the client is quit
                 int read = recv(fd, buffRead, 100000, 0);
-                if (read <= 0) {
+                if (read <= 0) { // handle quit
                     sprintf(buffWrite, "server: client %d just left\n", clients[fd].id);
                     sendMsg(fd);
-                    bzero(clients[fd].msg, strlen(clients[fd].msg));
                     FD_CLR(fd, &active_fds);
                     close(fd);
                     break;
                 }
-                else {
+                else { // handel msg
                     for (int i = 0, j = strlen(clients[fd].msg); i < read; i++, j++) {
                         clients[fd].msg[j] = buffRead[i];
                         if (clients[fd].msg[j] == '\n') {
