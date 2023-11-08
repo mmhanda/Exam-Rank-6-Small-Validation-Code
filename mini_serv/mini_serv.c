@@ -2,11 +2,11 @@
 
 typedef struct client {
     int id;
-    char msg[100000];
+    char msg[424242];
 } t_client;
 
 t_client clients[1024];
-char buffRead[100000], buffWrite[100000];
+char buffRead[424242], buffWrite[424242];
 int max = 0, next_id = 0;
 fd_set active_fds, Read_fds, Write_fds;
 
@@ -23,15 +23,15 @@ void sendMsg(int sender_fd) {
 int main(int ac, char **av) {
     if (ac != 2) exitError("Wrong number of arguments\n");
   	int sockfd = max = socket(AF_INET, SOCK_STREAM, 0); // copy from subject/main.c Unitl line 27
-	if (sockfd == -1) exitError("Fatal error\n");      // copy
+	if (sockfd == -1) exitError("Fatal error\n"); // copy from subject/main.c
     FD_ZERO(&active_fds);
     FD_SET(sockfd, &active_fds);
-	struct sockaddr_in servaddr; // copy from subject/main.c Unitl line 35
-	servaddr.sin_family = AF_INET; // copy
-	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1 // copy
-	servaddr.sin_port = htons(atoi(av[1]));                  // copy
-	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) exitError("Fatal error\n"); // copy
-	if (listen(sockfd, 10) != 0) exitError("Fatal error\n"); // copy
+	struct sockaddr_in servaddr; // copy from subject/main.c from subject/main.c Unitl line 35
+	servaddr.sin_family = AF_INET; // copy from subject/main.c
+	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1 // copy from subject/main.c
+	servaddr.sin_port = htons(atoi(av[1])); // copy from subject/main.c change the PORT
+	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) exitError("Fatal error\n"); // copy from subject/main.c
+	if (listen(sockfd, 10) != 0) exitError("Fatal error\n"); // copy from subject/main.c
     while(1) {
         Read_fds = Write_fds = active_fds;
         if (select(max + 1, &Read_fds, &Write_fds, NULL, NULL) < 0) continue;
@@ -47,7 +47,7 @@ int main(int ac, char **av) {
                 break;
             }
             if (FD_ISSET(fd, &Read_fds) && fd != sockfd) { // recive msgs from clients if its empty than the client is quit
-                int read = recv(fd, buffRead, 100000, 0);
+                int read = recv(fd, buffRead, sizeof(buffRead), 0);
                 if (read <= 0) { // handle quit
                     sprintf(buffWrite, "server: client %d just left\n", clients[fd].id);
                     sendMsg(fd);
