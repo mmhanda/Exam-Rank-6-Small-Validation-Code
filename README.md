@@ -1,4 +1,4 @@
-# Exam-Rank-6-Small-64 lines + 10 lines from the subject
+# Exam-Rank-6-Small-64 lines + 10 lines from the subject 42 school
 #### don't forget to give me a star :) ⭐
 ### here is an explanation of each line if you interested
 This is a C program that implements a basic server for handling multiple clients. The server listens for incoming connections, manages connected clients, and allows them to send and receive messages. Below is an explanation of each part of the code:
