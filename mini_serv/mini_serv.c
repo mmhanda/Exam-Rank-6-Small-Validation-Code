@@ -22,11 +22,11 @@ void sendMsg(int sender_fd) {
 
 int main(int ac, char **av) {
     if (ac != 2) exitError("Wrong number of arguments\n");
-  	int sockfd = max = socket(AF_INET, SOCK_STREAM, 0); // copy from subject/main.c Unitl line 27
+  	int sockfd = max = socket(AF_INET, SOCK_STREAM, 0); // copy from subject/main.c until line 27
 	if (sockfd == -1) exitError("Fatal error\n"); // copy from subject/main.c
     FD_ZERO(&active_fds);
     FD_SET(sockfd, &active_fds);
-	struct sockaddr_in servaddr; // copy from subject/main.c from subject/main.c Unitl line 35
+	struct sockaddr_in servaddr; // copy from subject/main.c from subject/main.c until line 35
 	servaddr.sin_family = AF_INET; // copy from subject/main.c
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1 // copy from subject/main.c
 	servaddr.sin_port = htons(atoi(av[1])); // copy from subject/main.c change the PORT
